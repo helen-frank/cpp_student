@@ -3369,7 +3369,6 @@ int main()
 - 清空缓冲区     cin.ignore(1024, '\n')
 
 ```c++
-1. 示例一
 #include <iostream>
 #include <string>
 
@@ -3405,7 +3404,7 @@ int main(void)
     return 0;
 }
 
-2.示例二
+
 #include <iostream>
 
 int main()
@@ -3537,7 +3536,7 @@ int main()
 
 **文件输入输出流 \<fstream>**
 
-文件模式
+**文件模式**
  ios::in        打开文件做读操作
  ios::out      打开文件做写操作，会删除原有数据
  ios::app     在每次写之前找到文件尾
@@ -3546,7 +3545,6 @@ int main()
  ios::binary  以二进制模式进行IO操作
 
 ```c++
-2. Example2
 #include <iostream>
 #include <fstream>
 
@@ -3573,7 +3571,7 @@ int test1(void)
 {
 	test0();
 
-	std: :ifstream ifs("text1.txt", std::ios::ate);
+	std::ifstream ifs("text1.txt", std::ios::ate);
 	if(!ifs)
 	{
 		std::cout << "ifstream error" << std::endl;
@@ -3614,8 +3612,6 @@ int main(void)
 	outfile.close();
 	return 0;
 }
-
-
 ```
 
 
@@ -3643,10 +3639,9 @@ ofs.open(″test.txt″);  	//使文件流与test.txt文件建立关联
 #include <string>
 #include <vector>
 
-	int
-	test0(void)
+int test0(void)
 {
-	std::ifstream ifs(“io1.cc”); //定义并打开了一个ifstream对象
+	std::ifstream ifs("io1.cc"); //定义并打开了一个ifstream对象
 	if (!ifs.good())
 	{
 		std::cout << "open file error!" << std::endl;
@@ -3722,6 +3717,159 @@ ofstream ofs(″test.txt″);
    ```
 
    此时文件流outfile与test2.txt建立关联，并指定了test2.txt的工作方式。
+
+```c++
+#include <iostream>
+#include <vector>
+
+using std::cout;
+using std::endl;
+
+using std::vector; //动态数组
+
+void display_capacity(vector<int> &vec)
+{
+	cout << "vector`s size = " << vec.size() << endl;		  //实际占用空间
+	cout << "vector`s capacity = " << vec.capacity() << endl; //总开辟空间
+}
+
+void test_1(void)
+{
+	vector<int> numbers;
+	numbers.reserve(10); //预先申请空间，并以这个数为底数来增长
+	for (int i = 0; i < 21; i++)
+	{
+		display_capacity(numbers);
+		numbers.push_back(i); //放一个元素到 vector的尾部
+		cout << endl;
+	}
+	display_capacity(numbers);
+}
+
+int main(void)
+{
+	test_1();
+}
+
+```
+
+自写
+
+ ```c++
+#include <fstream>
+#include <iostream>
+#include <istream>
+#include <string>
+#include <vector>
+
+using std::cout;
+using std::endl;
+using std::fstream;
+using std::ifstream; //从磁盘文件的输入
+using std::ofstream; //向磁盘文件的输出
+using std::string;
+
+using std::vector; //动态数组
+
+void display_capacity(vector<int> &vec)
+{
+	cout << "vector`s size = " << vec.size() << endl;		  //实际占用空间
+	cout << "vector`s capacity = " << vec.capacity() << endl; //总开辟空间
+}
+
+void test_1(void)
+{
+	vector<string> file;
+	vector<int> numbers;
+	numbers.reserve(10); //预先申请空间，并以这个数为底数来增长
+	for (int i = 0; i < 12; i++)
+	{
+		//display_capacity(numbers);
+		numbers.push_back(i * i); //放一个元素到 vector的尾部
+								  //cout << endl;
+	}
+	//display_capacity(numbers);
+
+	string line;
+
+	//文件输出流不要求文件必须存在，每次都会清空文件流,重新写入数据
+	ofstream ofs("./test/test_1.txt");
+	if (!ofs)
+	{
+		cout << "ofstream open error!" << endl;
+		return;
+	}
+	for (auto &line : numbers) //将numbers的中的元素一个一个读入到line里
+	{
+		cout << line << endl; //输出到终端
+		ofs << line << endl;  //输出到文件
+	}
+	ofs.close();
+}
+
+void test_2(void)
+{
+	ofstream ofs("./test/test_1.txt", std::ios::app); //append 添加到文件末尾
+	if (!ofs)
+	{
+		cout << "ofstream open error!" << endl;
+		return;
+	}
+
+	cout << "indicator`s pos = " << ofs.tellp() << endl; //当前文件游标的位置
+	ofs << "that`s new line \n";
+	ofs.close();
+}
+
+void test_3(void)
+{
+	ifstream ifs("./test/test_1.txt");
+	if (!ifs)
+	{
+		cout << "ifstream open error!" << endl;
+		return;
+	}
+	ifs.close();
+}
+
+void test_4(void)
+{
+	string file_name = "./test/test_1.txt";
+	fstream fs(file_name); //fstream 同样要求文件必须存在
+	if (!fs)
+	{
+		cout << "fstream open error!" << endl;
+		return;
+	}
+
+	int number;
+
+	for (int i = 0; i != 10; ++i)
+	{
+		//std::cin >> number;
+		number = i * i;
+		fs << number << " "; //把数据输出到文件
+	}
+
+	cout << "fs`s indicator`s pos = " << fs.tellp() << endl; //获取文件当前位置
+	fs.seekg(std::ios::beg);								 //文件指针位移到初始位置
+	for (int i = 0; i != 10; ++i)
+	{
+		fs >> number;
+		cout << number << " " << endl; //把数据从文件输入到number
+	}
+	fs.close();
+}
+
+int main(void)
+{
+	//test_1();
+	//test_2();
+	test_4();
+}
+ ```
+
+
 
 ### 7.5 字符串输入输出流
 
